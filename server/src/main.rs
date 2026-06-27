@@ -5,7 +5,7 @@ use rocket::{
     futures::lock::Mutex,
     get,
     http::{Cookie, CookieJar, Status},
-    launch, routes,
+    launch, post, routes,
     serde::{Deserialize, json::Json},
 };
 use uuid::Uuid;
@@ -62,7 +62,7 @@ async fn init(
     }
 }
 
-#[get("/guess", data = "<body>")]
+#[post("/guess", data = "<body>")]
 async fn guess(
     body: Json<Guess>,
     cookies: &CookieJar<'_>,
