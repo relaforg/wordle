@@ -34,10 +34,31 @@ async fn reset(cookies: &CookieJar<'_>, state: &State<Games>) -> Result<(), Stat
             state
                 .lock()
                 .await
-                .remove(&Uuid::parse_str(id.value()).map_err(|_| Status::BadRequest)?);
+                .remove(&Uuid::parse_str(id.value()).map_err(|_| Status::UnprocessableEntity)?);
             Ok(())
         }
         None => Err(Status::BadRequest),
+    }
+}
+
+#[get("/init")]
+async fn init(
+    cookies: &CookieJar<'_>,
+    state: &State<Games>,
+) -> Result<Json<GameStateView>, Status> {
+    match cookies.get_private("id") {
+        Some(id) => {
+            let id = Uuid::parse_str(id.value()).map_err(|_| Status::UnprocessableEntity)?;
+            Ok(Json(GameStateView::from(
+                state
+                    .lock()
+                    .await
+                    .get(&id)
+                    .unwrap_or(&GameState::new())
+                    .clone(),
+            )))
+        }
+        None => Ok(Json(GameStateView::from(GameState::new()))),
     }
 }
 
@@ -50,7 +71,7 @@ async fn guess(
     let word = body.data.clone();
     let (id, mut game_state) = match cookies.get_private("id") {
         Some(id) => {
-            let id = Uuid::parse_str(id.value()).map_err(|_| Status::BadRequest)?;
+            let id = Uuid::parse_str(id.value()).map_err(|_| Status::UnprocessableEntity)?;
             (
                 id,
                 state
@@ -88,5 +109,5 @@ fn rocket() -> _ {
     dotenvy::dotenv().ok();
     rocket::build()
         .manage(Mutex::new(HashMap::<Uuid, GameState>::new()))
-        .mount("/", routes![index, reset, guess])
+        .mount("/", routes![index, reset, guess, init])
 }
