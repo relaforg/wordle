@@ -6,7 +6,9 @@ export type Letter = {
   status: LetterStatus;
 };
 
-export type GameStatus = {
-    game_status: number,
+export type GameStatus = "Win"| "InProgress" | "Lose";
+
+export type Game = {
+    game_status: GameStatus,
     board_state: Letter[][]
 }

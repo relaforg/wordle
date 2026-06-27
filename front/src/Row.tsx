@@ -10,6 +10,7 @@ export function Row(props: RowProps) {
   for (let i = 0; i < 5; i++) {
     letterItems.push(
       <Square
+        key={i}
         letter={
           props.word[i] ? props.word[i] : { char: "", status: "Guessing" }
         }
