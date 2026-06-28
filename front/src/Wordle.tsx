@@ -12,10 +12,12 @@ export function Wordle() {
     board_state: [],
   });
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [isWordFinal, setIsWordFinal] = useState<boolean>(false)
 
   async function setBoard(game: Game) {
     setGame(game);
     setCurrentWord([]);
+    setIsWordFinal(false);
     if (game.game_status == "Win") {
       setFeedback({ text: "Well done!", type: "Info" });
     } else if (game.game_status == "Lose") {
@@ -93,7 +95,9 @@ export function Wordle() {
   useEffect(() => {
     const submitWord = async (word: Letter[]) => {
       if (word.length < 5) return;
+      if (isWordFinal) return;
 
+      setIsWordFinal(true)
       const payload = word.map((letter) => letter.char).join("");
 
       try {
@@ -132,6 +136,8 @@ export function Wordle() {
         submitWord(currentWord);
       } else {
         if (event.key === "Backspace" && feedback) setFeedback(null);
+        if (event.key === "Backspace" && isWordFinal) setIsWordFinal(false);
+
         setCurrentWord((previous) => addInput(event.key, previous));
       }
     };
@@ -141,7 +147,7 @@ export function Wordle() {
     return () => {
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [currentWord, feedback, game]);
+  }, [currentWord, feedback, game, isWordFinal]);
 
   const displayBoard = game.board_state.concat([currentWord]);
 
