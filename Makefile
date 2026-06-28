@@ -1,6 +1,7 @@
 build:
 	cd server && cargo build --release
 	cd front && npm install && npm run build
+	@printf 'ROCKET_SECRET_KEY=%s\n' $(shell openssl rand -base64 32) > server/.env
 
 run:
 	cd server && ./target/release/server &
