@@ -94,7 +94,7 @@ export function Wordle() {
           setGame(game);
           throw new Error(`Game init failed: ${response.status}`);
         }
-        
+
         game = await response.json();
         setGame(game);
       } catch (error) {
@@ -110,9 +110,8 @@ export function Wordle() {
 
       if (event.key === "Enter") {
         submitWord(currentWord);
-      } else if (event.key === "Backspace" && feedback) {
-        setFeedback(null);
       } else {
+        if (event.key === "Backspace" && feedback) setFeedback(null);
         setCurrentWord((previous) => addInput(event.key, previous));
       }
     };
@@ -136,7 +135,7 @@ export function Wordle() {
         <div>
           <Grid board={displayBoard} />
         </div>
-        <div>
+        <div className="h-12">
           {feedback && (
             <p
               className="
@@ -149,8 +148,6 @@ export function Wordle() {
               {feedback}
             </p>
           )}
-        </div>
-        <div className="h-12">
           {(game.game_status === "Win" || game.game_status === "Lose") && (
             <button
               className="
