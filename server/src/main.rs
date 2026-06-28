@@ -10,7 +10,7 @@ use rocket::{
 };
 use uuid::Uuid;
 
-use crate::game::{GameState, GameStateView, GameStatus, LetterState};
+use crate::game::{GameState, GameStateView, GameStatus, LetterState, WORDS};
 
 mod game;
 
@@ -69,6 +69,9 @@ async fn guess(
     state: &State<Games>,
 ) -> Result<Json<GameStateView>, Status> {
     let word = body.data.clone();
+    if !WORDS.contains(&word) {
+        return Err(Status::NotAcceptable);
+    }
     let (id, mut game_state) = match cookies.get_private("id") {
         Some(id) => {
             let id = Uuid::parse_str(id.value()).map_err(|_| Status::UnprocessableEntity)?;

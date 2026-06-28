@@ -2,7 +2,7 @@ use rand::seq::IndexedRandom;
 use rocket::serde::Serialize;
 use std::{collections::HashMap, sync::LazyLock};
 
-static WORDS: LazyLock<Vec<String>> = LazyLock::new(|| {
+pub static WORDS: LazyLock<Vec<String>> = LazyLock::new(|| {
     std::fs::read_to_string("words.txt")
         .expect("words.txt not found")
         .lines()
