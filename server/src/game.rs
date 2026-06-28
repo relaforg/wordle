@@ -36,13 +36,19 @@ pub struct LetterStatus {
 #[derive(Clone, Serialize)]
 #[serde(crate = "rocket::serde")]
 pub struct GameStateView {
+    word: String,
     game_status: GameStatus,
     board_state: Vec<Vec<LetterStatus>>,
 }
 
 impl From<GameState> for GameStateView {
     fn from(game_state: GameState) -> Self {
+        let word = match game_state.game_status {
+            GameStatus::InProgress => String::new(),
+            _ => game_state.word,
+        };
         GameStateView {
+            word,
             game_status: game_state.game_status,
             board_state: game_state.board_state,
         }
@@ -75,29 +81,38 @@ impl GameState {
             *occ.entry(c).or_insert(0) += 1;
         }
         let target: Vec<char> = self.word.chars().collect();
-        let mut state = Vec::new();
+        let mut state = vec![
+            LetterStatus {
+                char: '_',
+                status: LetterState::NotFound
+            };
+            5
+        ];
         for (i, c) in word.chars().enumerate() {
             if c == target[i] {
-                state.push(LetterStatus {
+                state[i] = LetterStatus {
                     char: c,
                     status: LetterState::Found,
-                });
+                };
                 if let Some(count) = occ.get_mut(&c) {
                     *count -= 1;
                 }
-            } else if target.contains(&c) && occ.contains_key(&c) && occ[&c] > 0 {
-                state.push(LetterStatus {
+            }
+        }
+        for (i, c) in word.chars().enumerate() {
+            if target.contains(&c) && occ.contains_key(&c) && occ[&c] > 0 {
+                state[i] = LetterStatus {
                     char: c,
                     status: LetterState::Misplaced,
-                });
+                };
                 if let Some(count) = occ.get_mut(&c) {
                     *count -= 1;
                 }
-            } else {
-                state.push(LetterStatus {
+            } else if c != target[i] {
+                state[i] = LetterStatus {
                     char: c,
                     status: LetterState::NotFound,
-                });
+                };
             }
         }
 
